@@ -9,27 +9,6 @@ from variables_nsl_kdd import *
 from collections import Counter
 
 
-# categorical_columns=['protocol_type', 'service', 'flag']
-
-# col_names = ['num_conn', 'startTimet', 'orig_pt', 'resp_pt1', 'orig_ht',
-# 'resp_ht', 'duration', 'protocol_type', 'resp_pt2', 'flag', 'src_bytes', 'dst_bytes',
-# 'land', 'wrong_fragment', 'urg', 'hot', 'num_failed_logins', 'logged_in', 'num_compromised',
-# 'root_shell', 'su_attempted', 'num_root', 'num_file_creations', 'num_shells', 
-# 'num_access_files', 'num_outbound_cmds', 'is_hot_login', 'is_guest_login', 'count', 
-# 'srv_count', 'serror_rate', 'srv_serror_rate_sec', 'rerror_rate', 'srv_error_rate_sec', 
-# 'same_srv_rate', 'diff_srv_rate', 'dst_host_diff_srv_rate', 'count_100', 'srv_count_100', 
-# 'same_srv_rate_100', 'diff_srv_rate_100', 'dst_host_same_src_port_rate', 'dst_host_srv_diff_host_rate', 
-# 'dst_host_serror_rat', 'dst_host_srv_serror_rate', 'dst_host_rerror_rate', 'dst_host_srv_rerror_rate']
-
-# selected_col_names = ["protocol_type", "service", "flag", "src_bytes", 
-# "dst_bytes", "wrong_fragment", "hot", "logged_in", 
-# "root_shell", "num_root", "count", "srv_count", "serror_rate", 
-# "rerror_rate", "same_srv_rate", "diff_srv_rate", "dst_host_count", 
-# "dst_host_srv_count", "dst_host_same_srv_rate", "dst_host_diff_srv_rate", 
-# "dst_host_same_src_port_rate", "dst_host_srv_diff_host_rate", "dst_host_serror_rate", 
-# "dst_host_srv_serror_rate", "dst_host_rerror_rate", "dst_host_srv_rerror_rate", "label"]
-
-
 # Loading the models and other objects
 dos_model = load('nsl_kdd_dos_model.joblib')
 probe_model = load('nsl_kdd_probe_model.joblib')
@@ -46,15 +25,18 @@ def select_columns(data_frame, column_names):
     new_frame = data_frame.loc[:, new_column_names]
     return new_frame
 
-def _labelEnc(c_val, c):
-    # c_val is the category value for the particular row
-    encoded_val = dict_label_encoder[c].transform([c_val])[0]
-    # if encoded_val != 5:
-    # print("c_val ", c_val, " encoded_val, ", encoded_val)
-    return encoded_val
+# def _labelEnc(c_val, c):
+#     # c_val is the category value for the particular row
+    
+#     print('c_val ', c_val)
+    
+#     encoded_val = dict_label_encoder[c].transform([c_val])[0]
+#     # if encoded_val != 5:
+#     # print("c_val ", c_val, " encoded_val, ", encoded_val)
+#     return encoded_val
 
-def _readLogs(file_path = "slowloris.csv"):
-    df_test = pd.read_csv(file_path)
+def _readLogs(file_path = "KDDTest.txt"):
+    df_test = pd.read_csv(file_path, header=None, names = col_names)
     df_test['service'] = 'http'
     df_test['flag']    = 'S0'
     df_test['label']   = 'normal'
@@ -63,7 +45,9 @@ def _readLogs(file_path = "slowloris.csv"):
     df_test['dst_host_srv_count']  = 0
     df_test['dst_host_same_srv_rate']  = 0
     df_test['dst_host_serror_rate'] = 0
-    print('Dimensions of the Test set:',df_test.shape)
+    
+    # print('Dimensions of the Test set:',df_test.shape)
+
     df_test = select_columns(df_test, selected_col_names)
 
     # # debugging starts ---
@@ -79,16 +63,16 @@ def _readLogs(file_path = "slowloris.csv"):
     # print("dum_cols ", dum_cols)
 
     df_test_categorical = df_test[categorical_columns]
-    # df_test_categorical = df_test_categorical.apply(le2.transform)
-    for c in categorical_columns:
-        # using label encoder fitted on the trained data set to label encode df_test 
-        # print("c ", c)
-        df_test_categorical[c] = df_test_categorical[c].apply(_labelEnc, args = (c,))
+    df_test_categorical = df_test_categorical.apply(LabelEncoder().fit_transform)
+    # for c in categorical_columns:
+    #     # using label encoder fitted on the trained data set to label encode df_test 
+    #     print("c ", c, " labels ", dict_label_encoder[c].classes_)
+    #     df_test_categorical[c] = df_test_categorical[c].apply(_labelEnc, args = (c,))
 
         # print("converted ", df_test_categorical[c].unique(), " le.classes ", len(dict_label_encoder[c].classes_))
     
     # print("after label encoding ")
-    print(df_test_categorical.head())
+    # print(df_test_categorical.head())
 
     # using one hot encoder on above 
     df_test_categorical_enc = one_hot_encoder.transform(df_test_categorical)
@@ -118,6 +102,7 @@ def _readLogs(file_path = "slowloris.csv"):
     
 def _predict(X):
     # calculating probability for dos
+    X = X.fillna(0)
     X_dos = scaler_dos.transform(X)
     X_dos1 = scaler_dos.transform(X)
     X_dos = dos_model.predict_proba(X_dos)
@@ -139,7 +124,7 @@ def _predict(X):
 
 if __name__ == "__main__":
     print("testing on logs")
-    X = _readLogs(file_path="slowloris.csv")
+    X = _readLogs()
     print("now predicting")
     y = _predict(X)
 

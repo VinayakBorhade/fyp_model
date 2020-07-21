@@ -5,6 +5,6 @@ X = model._readLogs(file_path="xss.txt")
 y = model._predict(X)
 
 print("----------------calling nsl kdd model----------------")
-X = model2._readLogs(file_path="slowloris.csv")
+X = model2._readLogs(file_path="KDDTest.txt")
 y = model2._predict(X)
 print(y)
