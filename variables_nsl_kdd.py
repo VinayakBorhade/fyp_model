@@ -11,6 +11,17 @@ col_names = ["duration","protocol_type","service","flag","src_bytes",
     "dst_host_srv_diff_host_rate","dst_host_serror_rate","dst_host_srv_serror_rate",
     "dst_host_rerror_rate","dst_host_srv_rerror_rate","label","extra"]
 
+col_names_realtime_test = ["num_conn","startTimet","orig_pt","resp_pt1","orig_ht","resp_ht",
+"duration","protocol_type","resp_pt2","flag","src_bytes","dst_bytes","land",
+"wrong_fragment","urg","hot","num_failed_logins",
+"logged_in","num_compromised","root_shell","su_attempted",
+"num_root","num_file_creations","num_shells","num_access_files","num_outbound_cmds",
+"is_hot_login","is_guest_login","count","srv_count","serror_rate",
+"srv_serror_rate_sec","rerror_rate","srv_error_rate_sec","same_srv_rate","diff_srv_rate",
+"dst_host_diff_srv_rate","count_100","srv_count_100","same_srv_rate_100","diff_srv_rate_100",
+"dst_host_same_src_port_rate","dst_host_srv_diff_host_rate","dst_host_serror_rat","dst_host_srv_serror_rate",
+"dst_host_rerror_rate","dst_host_srv_rerror_rate"]
+
 selected_col_names = ["protocol_type", "service", "flag", "src_bytes", 
 "dst_bytes", "wrong_fragment", "hot", "logged_in", 
 "root_shell", "num_root", "count", "srv_count", "serror_rate", 

@@ -20,7 +20,13 @@ scaler_probe = load('scaler_probe.joblib')
 def select_columns(data_frame, column_names):
     new_column_names = []
     for i in column_names:
+        
+        # print("here ", i)
+
         if i in data_frame.columns:
+
+            # print("selected i ", i)
+
             new_column_names.append(i)
     new_frame = data_frame.loc[:, new_column_names]
     return new_frame
@@ -35,10 +41,13 @@ def select_columns(data_frame, column_names):
 #     # print("c_val ", c_val, " encoded_val, ", encoded_val)
 #     return encoded_val
 
-def _readLogs(file_path = "KDDTest.txt"):
-    df_test = pd.read_csv(file_path, header=None, names = col_names)
+def _readLogs(file_path = "realtime_test_dataset.csv"):
+    df_test = pd.read_csv(file_path)
     df_test['service'] = 'http'
+    
+    # commenting flag below for realtime_test_dataset.csv
     df_test['flag']    = 'S0'
+
     df_test['label']   = 'normal'
     df_test['urgent']  = 0
     df_test['dst_host_count']  = 0
@@ -46,7 +55,7 @@ def _readLogs(file_path = "KDDTest.txt"):
     df_test['dst_host_same_srv_rate']  = 0
     df_test['dst_host_serror_rate'] = 0
     
-    # print('Dimensions of the Test set:',df_test.shape)
+    print('Dimensions of the Test set:',df_test.columns)
 
     df_test = select_columns(df_test, selected_col_names)
 
