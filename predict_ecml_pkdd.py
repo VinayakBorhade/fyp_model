@@ -38,13 +38,32 @@ def to_str(X):
     return X_str
 
 
-def _readLogs(file_path = "forensics_tomcat_logs_sample.txt"):
+def _readLogs(file_path = "tomcat_attack.txt"):
     print("reading logs")
     header_lower = [i.lower() for i in header]
     header_ecml_pkdd_lower = [i.lower() for i in header_ecml_pkdd]
-    df = pd.read_csv(file_path, names = header_lower, sep = '   ')
+    # df = pd.read_csv(file_path, names = header_lower, sep = '   ')
 
-    # print("df.columns ", df.columns)
+    
+    #list of dictionaries
+    ld = []
+    f = open(file_path, 'r')
+    for l in f:
+        row = l.split("   ")
+
+        # print("row ", row)
+
+        dict_row = {}
+        for i, r in enumerate(row):
+            dict_row[header_lower[i]] = r
+        ld.append(dict_row)
+    
+    # for i in ld:
+    #     print(i)
+
+    df = pd.DataFrame(ld)
+
+    print("df.columns ", df.columns)
 
     df = select_columns(header_ecml_pkdd_lower, df)
 
@@ -52,7 +71,11 @@ def _readLogs(file_path = "forensics_tomcat_logs_sample.txt"):
 
     X = df.copy()
 
-    # print(X.head())
+    # print(X.to_string())
+
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):  # more options can be specified also
+        print(df)
+    
     X_str = to_str(X)
     X_str_v = vectorizer.transform(X_str)
     y_pred = linear_svc_model.predict(X_str_v)
