@@ -42,7 +42,7 @@ def select_columns(data_frame, column_names):
 #     return encoded_val
 
 def _readLogs(file_path = "realtime_test_dataset.csv"):
-    df_test = pd.read_csv(file_path)
+    df_test = pd.read_csv(file_path, names = col_names)
     df_test['service'] = 'http'
     
     # commenting flag below for realtime_test_dataset.csv
@@ -104,7 +104,7 @@ def _readLogs(file_path = "realtime_test_dataset.csv"):
     # dropping label for predicting
     X = df_test.drop(['label'], axis = 1)
 
-    # print('X.shape ', X.shape)
+    print('X.shape ', X.shape)
 
     return X
 
