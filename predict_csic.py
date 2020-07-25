@@ -3,10 +3,77 @@ from joblib import dump, load
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-
+from variables_csic import *
+import re
 
 lr = load('lr_model_v2.joblib')
 vectorizer = load('vectorizer_v2.joblib')
+
+def Find(string):
+    # findall() has been used  
+    # with valid conditions for urls in string 
+    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    url = re.findall(regex,string)
+    return [x[0] for x in url]
+
+
+def select_columns(columns, df):
+    new_columns = []
+    for c in columns:
+        if c.lower() in df.columns:
+            new_columns.append(c)
+    
+    # print("new_columns ", new_columns)
+
+    df2 = df.loc[:, new_columns]
+    return df2
+
+
+def _readLogs2(file_path = "tomcat_attack.txt"):
+    header_lower = [i.lower() for i in header]
+    header_csic_lower = [i.lower() for i in header_csic]
+
+    #list of dictionaries
+    ld = []
+    f = open(file_path, 'r')
+    cnt = 0
+    for l in f:
+        row = l.split("   ")
+
+        # print("row ", row)
+
+        dict_row = {}
+        dict_row['idx'] = cnt
+        cnt += 1
+        for i, r in enumerate(row):
+            col = header_lower[i]
+
+            # print("col ", col)
+
+            if r == "" or r == '-':
+                r = ""
+            if col == 'url':
+                r = r.split(" ")[1]
+                # hard - coding the protocol and host name for csic model
+                if len(Find(r)) == 0:
+                    r = "http://" + "" + r
+            dict_row[col] = r
+        url_row = dict_row['url']
+        # hard - coding the protocol and host name for csic model
+        if len(Find(r)) == 0:
+            url_row = "http://" + dict_row['host'] + url_row
+        dict_row['url'] = url_row
+        ld.append(dict_row)
+    
+    for i in ld:
+        print(i)
+
+    df = pd.DataFrame(ld)
+
+    df = select_columns(header_csic_lower, df)
+    X = df.copy()
+    return X
+
 
 def _readLogs(file_path="sql_injection_2.txt"):
     print("reading logs file")
@@ -121,6 +188,7 @@ def _predict(X):
 
 if __name__ == "__main__":
     print("testing on logs")
-    X = _readLogs(file_path="xss.txt")
+    # X = _readLogs(file_path="xss.txt")
+    X = _readLogs2()
     print("now predicting")
     y = _predict(X)
